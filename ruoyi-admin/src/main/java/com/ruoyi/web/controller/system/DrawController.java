@@ -1,0 +1,260 @@
+package com.ruoyi.web.controller.system;
+
+import com.alibaba.fastjson.JSONObject;
+import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.utils.ServletUtils;
+import com.ruoyi.common.utils.http.HttpUtils;
+import com.ruoyi.common.utils.sign.SignUtils;
+import com.ruoyi.framework.web.service.TokenService;
+import com.ruoyi.system.domain.DrawItem;
+import com.ruoyi.system.domain.DrawRecord;
+import com.ruoyi.system.domain.GameAccount;
+import com.ruoyi.system.service.IDrawItemService;
+import com.ruoyi.system.service.IDrawRecordService;
+import com.ruoyi.system.service.IGameAccountService;
+import com.ruoyi.web.controller.bean.Item;
+import com.ruoyi.web.controller.bean.RateRandomNumber;
+import com.ruoyi.web.controller.bean.Role;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.*;
+
+/**
+ * @author ruoyi
+ * @date 2020-11-30
+ */
+@RestController
+@RequestMapping("/draw")
+public class DrawController extends BaseController {
+
+    private static final String gameUrl = "http://81.70.236.13:8090/role/findByAccount";
+    private static final String gameUrlUpdate = "http://81.70.236.13:8090/role/updateById";
+    private static final String gmUrl = "http://gm-sszg.lichenbo.cn/gm9/user/gmquery.php";
+    private static final String gmUrl_day = "http://fl.xiaoheigame.com";
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private IGameAccountService gameAccountService;
+
+    @Autowired
+    private IDrawItemService drawItemService;
+
+    @Autowired
+    private IDrawRecordService drawRecordService;
+
+    /**
+     * 开始抽奖，
+     * 1.抽奖
+     * 2.异步减少用户的快乐币数量
+     * 3.异步给用户发送物品邮件
+     */
+    @PreAuthorize("@ss.hasPermi('draw:getReward')")
+    @GetMapping("/getReward")
+    public AjaxResult getReward(@RequestParam Integer id, @RequestParam Integer money, @RequestParam String roleName) {
+
+        // 查询物品列表
+        List<DrawItem> drawItems = drawItemService.selectDrawItemList(new DrawItem());
+        List<Double> separates = new ArrayList<>();
+        List<Integer> percents = new ArrayList<>();
+        Map<Integer, String> itemMap = new HashMap<>();
+        if (drawItems != null && drawItems.size() > 0) {
+            for (int i = 0; i < drawItems.size(); i++) {
+                DrawItem drawItem = drawItems.get(i);
+                percents.add((int) (drawItem.getRate() * 100));
+                itemMap.put(Math.toIntExact(drawItem.getNum()), drawItem.getName());
+            }
+        }
+        separates.add(1.0);
+        separates.add(2.0);
+        separates.add(3.0);
+        separates.add(4.0);
+        separates.add(5.0);
+        separates.add(6.0);
+        separates.add(7.0);
+
+        double number = RateRandomNumber.produceRateRandomNumber(0.1, 8, separates, percents);
+        int re = Integer.parseInt(String.format("%.0f", number));
+        if (re != 8) {
+            re += 1;
+        }
+
+        String itemName = itemMap.get(re);
+        String item = "";
+        String uid = getSysUser().getUserName();
+        int num = 0;
+        String type = "daoju";
+        switch (re) {
+            case 1:
+                // 先知5		0.01
+                item = "14001";
+                num = 10;
+                break;
+            case 2:
+                // 经验5000w
+                item = "22";
+                num = 50000000;
+                break;
+            case 3:
+                // 符文1万
+                item = "10450";
+                num = 10000;
+                break;
+            case 4:
+                // 金币5000w
+                item = "1";
+                num = 50000000;
+                break;
+            case 5:
+                // 天赋秘典5
+                item = "10006";
+                num = 5;
+                break;
+            case 6:
+                // 高级探宝1张
+                item = "37002";
+                num = 1;
+                break;
+            case 7:
+                // 奥术10--》20		0.25
+                num = 20;
+                item = "10040";
+                break;
+            case 8:
+                // 原初20--》50		0.35
+                item = "17009";
+                num = 50;
+                break;
+            default:
+                item = "3";
+                num = 500;
+                break;
+        }
+
+        DrawRecord record = new DrawRecord();
+        record.setRoleName(roleName);
+        record.setPrize(itemName);
+        record.setCreateBy(uid);
+        record.setCreateTime(new Date());
+        Long count = null;
+        int totalCount = drawRecordService.getTotalCount(uid);
+        try {
+            GameAccount gameAccount = gameAccountService.selectGameAccountByName(uid);
+            count = gameAccount.getCount();
+            if (count == 0 && money < 50) {
+                record.setStatus("failed,没有次数了!");
+                return new AjaxResult(200, "请求成功！", new Item(re, itemName, Math.toIntExact(count), money));
+            }
+            Long version = gameAccount.getVersion();
+            // 钻石500
+            sendEmail("3", uid, 500, type);
+            // 随机5星碎片
+            sendEmail("29905", uid, 5, type);
+            if (count > 0) {
+                // 不消耗快乐币发送邮件
+                String emailResult = sendEmail(item, uid, num, type);
+                if ("ok！设置成功".equals(emailResult) || "发送成功".equals(emailResult)) {
+                    int i = 0;
+                    while (i == 0) {
+                        // 并发版本控制
+                        i = gameAccountService.updateGameAccountByVersion(--count, version, uid);
+                    }
+                }
+            } else {
+                // 1.减少快乐币
+                money = money - 50;
+                String params = "id=" + id + "&money=" + money;
+                JSONObject result = JSONObject.parseObject(HttpUtils.sendGet(gameUrlUpdate, params + "&sign=" + SignUtils.getSign(params)));
+                if (result.getInteger("code") == 200) {
+                    sendEmail(item, uid, num, type);
+                }
+            }
+            record.setStatus("ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+            record.setStatus("fail:" + e.getMessage());
+        } finally {
+            drawRecordService.insertDrawRecord(record);
+        }
+        return new AjaxResult(200, "请求成功！", new Item(re, itemName, Math.toIntExact(count), money, totalCount));
+    }
+
+    /**
+     * 发送每日福利
+     *
+     * @return
+     */
+    @GetMapping("/dayFuli")
+    public AjaxResult getDayFuli() {
+        SysUser user = getSysUser();
+        String userName = user.getUserName();
+        GameAccount gameAccount = gameAccountService.selectGameAccountByName(userName);
+        String password = gameAccount.getPassword();
+        String params = "qu=1&submit=oneday&user=" + userName + "&password=" + password;
+        String result = HttpUtils.sendPost(gmUrl_day, params);
+        result = result.substring(result.indexOf("script>") + 14, result.indexOf("</script>") - 2);
+        return new AjaxResult(200, "success", result);
+    }
+
+    private String sendEmail(String item, String uid, int num, String type) {
+        // 发送邮件
+        String paramEmail = "type=" + type + "&qu=1&checknum=952000&item=" + item + "&uid=" + uid + "&num=" + num;
+        String sign = SignUtils.getSign(paramEmail);
+        return HttpUtils.sendPost(gmUrl, paramEmail + "&sign=" + sign);
+    }
+
+
+    /**
+     * 获取玩家主要信息
+     * <p>
+     * 获取抽奖物品信息
+     *
+     * @return
+     */
+//    @PreAuthorize("@ss.hasPermi('draw:getPlayerInfo')")
+    @GetMapping("/getPlayerInfo")
+    public AjaxResult getPlayerInfo() {
+        SysUser user = getSysUser();
+        String paramKey = "account=" + user.getUserName();
+        String param = paramKey + "&sign=" + SignUtils.getSign(paramKey);
+        JSONObject result = JSONObject.parseObject(HttpUtils.sendGet(gameUrl, param));
+        JSONObject resultAjax = new JSONObject();
+        // 查询物品列表
+        List<DrawItem> drawItems = drawItemService.selectDrawItemList(new DrawItem());
+        GameAccount gameAccount = gameAccountService.selectGameAccountByName(user.getUserName());
+        int totalCount = drawRecordService.getTotalCount(user.getUserName());
+        resultAjax.put("items", drawItems);
+        resultAjax.put("count", gameAccount.getCount());
+        if (result.getInteger("code") == 200) {
+            Role role = result.getJSONObject("data").toJavaObject(Role.class);
+            resultAjax.put("id", role.getRid());
+            resultAjax.put("money", role.getGameFzb());
+            resultAjax.put("roleName", role.getName());
+            resultAjax.put("totalCount", totalCount);
+            return new AjaxResult(200, "请求成功！", resultAjax);
+        }
+
+        return new AjaxResult(500, "请求失败！", resultAjax);
+    }
+
+    private SysUser getSysUser() {
+        LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+        SysUser user = loginUser.getUser();
+        return user;
+    }
+
+    public static void main(String[] args) {
+        String param = "account=hahayu" + "&sign=" + SignUtils.getSign("account=hahayu");
+        String s = HttpUtils.sendGet("http://81.70.236.13:8090/role/findByAccount", param);
+        System.out.println(s);
+    }
+}

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.GameAccountMapper">
+
+    <resultMap type="GameAccount" id="GameAccountResult">
+        <result property="uid" column="uid"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="accIdfa" column="acc_idfa"/>
+        <result property="regIp" column="reg_ip"/>
+        <result property="count" column="count"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="selectGameAccountVo">
+        select uid, username, password, acc_idfa, reg_ip, count, version
+        from game_account
+    </sql>
+
+    <select id="selectGameAccountList" parameterType="GameAccount" resultMap="GameAccountResult">
+        <include refid="selectGameAccountVo"/>
+        <where>
+            <if test="username != null  and username != ''">and username like concat('%', #{username}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectGameAccountById" parameterType="Integer" resultMap="GameAccountResult">
+        <include refid="selectGameAccountVo"/>
+        where uid = #{uid}
+    </select>
+    <select id="selectGameAccountByName" parameterType="String" resultMap="GameAccountResult">
+        <include refid="selectGameAccountVo"/>
+        where username = #{userName}
+    </select>
+
+
+    <insert id="insertGameAccount" parameterType="GameAccount" useGeneratedKeys="true" keyProperty="uid">
+        insert into game_account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null and username != ''">username,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="accIdfa != null and accIdfa != ''">acc_idfa,</if>
+            <if test="regIp != null and regIp != ''">reg_ip,</if>
+            <if test="count != null">count,</if>
+            <if test="version != null">version,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="accIdfa != null and accIdfa != ''">#{accIdfa},</if>
+            <if test="regIp != null and regIp != ''">#{regIp},</if>
+            <if test="count != null">#{count},</if>
+            <if test="version != null">#{version},</if>
+        </trim>
+    </insert>
+
+    <update id="updateGameAccount" parameterType="GameAccount">
+        update game_account
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="accIdfa != null and accIdfa != ''">acc_idfa = #{accIdfa},</if>
+            <if test="regIp != null and regIp != ''">reg_ip = #{regIp},</if>
+            <if test="count != null">count = #{count},</if>
+            <if test="version != null">version = #{version},</if>
+        </trim>
+        where uid = #{uid}
+    </update>
+
+    <delete id="deleteGameAccountById" parameterType="Integer">
+        delete
+        from game_account
+        where uid = #{uid}
+    </delete>
+
+    <delete id="deleteGameAccountByIds" parameterType="String">
+        delete from game_account where uid in
+        <foreach item="uid" collection="array" open="(" separator="," close=")">
+            #{uid}
+        </foreach>
+    </delete>
+
+    <update id="updateByVersion">
+        update game_account
+        set count  = #{count},
+            version=(1 + #{version})
+        where version = #{version}
+          and username = #{username}
+    </update>
+
+    <update id="updateGameAccountCount">
+        update game_account
+        set count  = 10
+    </update>
+
+</mapper>

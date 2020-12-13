@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DrawItemMapper">
+    
+    <resultMap type="DrawItem" id="DrawItemResult">
+        <result property="id"    column="id"    />
+        <result property="icon"    column="icon"    />
+        <result property="name"    column="name"    />
+        <result property="num"    column="num"    />
+        <result property="rate"    column="rate"    />
+        <result property="isPrize"    column="is_prize"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectDrawItemVo">
+        select id, icon, name, num, rate, is_prize, del_flag, create_by, create_time, update_by, update_time from draw_item
+    </sql>
+
+    <select id="selectDrawItemList" parameterType="DrawItem" resultMap="DrawItemResult">
+        <include refid="selectDrawItemVo"/>
+        <where>  
+            <if test="icon != null  and icon != ''"> and icon = #{icon}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="num != null "> and num = #{num}</if>
+            <if test="rate != null "> and rate = #{rate}</if>
+        </where>
+    </select>
+    
+    <select id="selectDrawItemById" parameterType="Long" resultMap="DrawItemResult">
+        <include refid="selectDrawItemVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertDrawItem" parameterType="DrawItem" useGeneratedKeys="true" keyProperty="id">
+        insert into draw_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="icon != null">icon,</if>
+            <if test="name != null">name,</if>
+            <if test="num != null">num,</if>
+            <if test="rate != null">rate,</if>
+            <if test="isPrize != null">is_prize,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="icon != null">#{icon},</if>
+            <if test="name != null">#{name},</if>
+            <if test="num != null">#{num},</if>
+            <if test="rate != null">#{rate},</if>
+            <if test="isPrize != null">#{isPrize},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDrawItem" parameterType="DrawItem">
+        update draw_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="num != null">num = #{num},</if>
+            <if test="rate != null">rate = #{rate},</if>
+            <if test="isPrize != null">is_prize = #{isPrize},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDrawItemById" parameterType="Long">
+        delete from draw_item where id = #{id}
+    </delete>
+
+    <delete id="deleteDrawItemByIds" parameterType="String">
+        delete from draw_item where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -54,11 +54,12 @@ public class SysLoginService
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));
             throw new CaptchaExpireException();
         }
-        if (!code.equalsIgnoreCase(captcha))
-        {
-            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
-            throw new CaptchaException();
-        }
+        // 取消验证码的校验
+//        if (!code.equalsIgnoreCase(captcha))
+//        {
+//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
+//            throw new CaptchaException();
+//        }
         // 用户验证
         Authentication authentication = null;
         try
