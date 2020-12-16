@@ -56,4 +56,8 @@ create table score_record
 ) engine = innodb
   auto_increment = 200 comment = '积分兑换表';
 
+#数据库表增加字段
+ALTER TABLE draw_item ADD COLUMN item_num VARCHAR(100) DEFAULT NULL COMMENT '物品发送的数量' AFTER rate;
+ALTER TABLE draw_item ADD COLUMN level int DEFAULT NULL COMMENT '奖品级别' AFTER rate;
+
 

@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.DrawItemMapper">
     
-    <resultMap type="DrawItem" id="DrawItemResult">
+    <resultMap type="com.ruoyi.system.domain.DrawItem" id="DrawItemResult">
         <result property="id"    column="id"    />
         <result property="icon"    column="icon"    />
         <result property="name"    column="name"    />
@@ -16,19 +16,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="itemNum"    column="item_num"    />
+        <result property="level"    column="level"    />
     </resultMap>
 
     <sql id="selectDrawItemVo">
         select id, icon, name, num, rate, is_prize, del_flag, create_by, create_time, update_by, update_time from draw_item
     </sql>
 
-    <select id="selectDrawItemList" parameterType="DrawItem" resultMap="DrawItemResult">
+    <select id="selectDrawItemList" parameterType="com.ruoyi.system.domain.DrawItem" resultMap="DrawItemResult">
         <include refid="selectDrawItemVo"/>
         <where>  
             <if test="icon != null  and icon != ''"> and icon = #{icon}</if>
             <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
             <if test="num != null "> and num = #{num}</if>
             <if test="rate != null "> and rate = #{rate}</if>
+            <if test="level != null "> and level = #{level}</if>
         </where>
     </select>
     
@@ -37,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
         
-    <insert id="insertDrawItem" parameterType="DrawItem" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertDrawItem" parameterType="com.ruoyi.system.domain.DrawItem" useGeneratedKeys="true" keyProperty="id">
         insert into draw_item
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="icon != null">icon,</if>
@@ -50,6 +53,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
+            <if test="itemNum != null">item_num,</if>
+            <if test="level != null">level,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="icon != null">#{icon},</if>
@@ -62,10 +67,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="itemNum != null">#{itemNum},</if>
+            <if test="level != null">#{level},</if>
          </trim>
     </insert>
 
-    <update id="updateDrawItem" parameterType="DrawItem">
+    <update id="updateDrawItem" parameterType="com.ruoyi.system.domain.DrawItem">
         update draw_item
         <trim prefix="SET" suffixOverrides=",">
             <if test="icon != null">icon = #{icon},</if>
@@ -78,6 +85,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="itemNum != null">item_num = #{itemNum},</if>
+            <if test="level != null">level = #{level},</if>
         </trim>
         where id = #{id}
     </update>

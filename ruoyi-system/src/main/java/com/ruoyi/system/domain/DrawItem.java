@@ -18,6 +18,12 @@ public class DrawItem extends BaseEntity
     /** 主键id */
     private Long id;
 
+    @Excel(name = "物品数量")
+    private int itemNum;
+
+    @Excel(name = "奖品级别，别名")
+    private int level;
+
     /** 图片路径 */
     @Excel(name = "图片路径")
     private String icon;
@@ -41,7 +47,39 @@ public class DrawItem extends BaseEntity
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
 
-    public void setId(Long id) 
+    public DrawItem() {
+    }
+
+    public DrawItem(Long id, int itemNum, int level, String icon, String name, Long num, Double rate,
+        Integer isPrize, String delFlag) {
+        this.id = id;
+        this.itemNum = itemNum;
+        this.level = level;
+        this.icon = icon;
+        this.name = name;
+        this.num = num;
+        this.rate = rate;
+        this.isPrize = isPrize;
+        this.delFlag = delFlag;
+    }
+
+    public int getItemNum() {
+        return itemNum;
+    }
+
+    public void setItemNum(int itemNum) {
+        this.itemNum = itemNum;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public void setId(Long id)
     {
         this.id = id;
     }

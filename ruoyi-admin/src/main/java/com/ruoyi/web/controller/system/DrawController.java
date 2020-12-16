@@ -15,6 +15,7 @@ import com.ruoyi.system.domain.GameAccount;
 import com.ruoyi.system.service.IDrawItemService;
 import com.ruoyi.system.service.IDrawRecordService;
 import com.ruoyi.system.service.IGameAccountService;
+import com.ruoyi.utils.RandomUtils;
 import com.ruoyi.web.controller.bean.Item;
 import com.ruoyi.web.controller.bean.RateRandomNumber;
 import com.ruoyi.web.controller.bean.Role;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
 /**
- * @author ruoyi
+ * @author lcb
  * @date 2020-11-30
  */
 @RestController
@@ -64,81 +65,64 @@ public class DrawController extends BaseController {
 
         // 查询物品列表
         List<DrawItem> drawItems = drawItemService.selectDrawItemList(new DrawItem());
-        List<Double> separates = new ArrayList<>();
-        List<Integer> percents = new ArrayList<>();
-        Map<Integer, String> itemMap = new HashMap<>();
-        if (drawItems != null && drawItems.size() > 0) {
-            for (int i = 0; i < drawItems.size(); i++) {
-                DrawItem drawItem = drawItems.get(i);
-                percents.add((int) (drawItem.getRate() * 100));
-                itemMap.put(Math.toIntExact(drawItem.getNum()), drawItem.getName());
-            }
-        }
-        separates.add(1.0);
-        separates.add(2.0);
-        separates.add(3.0);
-        separates.add(4.0);
-        separates.add(5.0);
-        separates.add(6.0);
-        separates.add(7.0);
+        Map<DrawItem, Integer> itemMap = new HashMap<>();
+        drawItems.stream().forEach(drawItem -> {
+            itemMap.put(drawItem, (int) (drawItem.getRate()*1000));
+        });
 
-        double number = RateRandomNumber.produceRateRandomNumber(0.1, 8, separates, percents);
-        int re = Integer.parseInt(String.format("%.0f", number));
-        if (re != 8) {
-            re += 1;
-        }
-
-        String itemName = itemMap.get(re);
-        String item = "";
+        DrawItem drawItem = RandomUtils.chanceSelect(itemMap);
         String uid = getSysUser().getUserName();
-        int num = 0;
+
+        String itemName = drawItem.getName();
+        String item = drawItem.getNum()+"";
+        int num = drawItem.getItemNum();
         String type = "daoju";
-        switch (re) {
-            case 1:
-                // 先知5		0.01
-                item = "14001";
-                num = 10;
-                break;
-            case 2:
-                // 经验5000w
-                item = "22";
-                num = 50000000;
-                break;
-            case 3:
-                // 符文1万
-                item = "10450";
-                num = 10000;
-                break;
-            case 4:
-                // 金币5000w
-                item = "1";
-                num = 50000000;
-                break;
-            case 5:
-                // 天赋秘典5
-                item = "10006";
-                num = 5;
-                break;
-            case 6:
-                // 高级探宝1张
-                item = "37002";
-                num = 1;
-                break;
-            case 7:
-                // 奥术10--》20		0.25
-                num = 20;
-                item = "10040";
-                break;
-            case 8:
-                // 原初20--》50		0.35
-                item = "17009";
-                num = 50;
-                break;
-            default:
-                item = "3";
-                num = 500;
-                break;
-        }
+//        switch (re) {
+//            case 1:
+//                // 先知5		0.01
+//                item = "14001";
+//                num = 10;
+//                break;
+//            case 2:
+//                // 经验5000w
+//                item = "22";
+//                num = 50000000;
+//                break;
+//            case 3:
+//                // 符文1万
+//                item = "10450";
+//                num = 10000;
+//                break;
+//            case 4:
+//                // 金币5000w
+//                item = "1";
+//                num = 50000000;
+//                break;
+//            case 5:
+//                // 天赋秘典5
+//                item = "10006";
+//                num = 5;
+//                break;
+//            case 6:
+//                // 高级探宝1张
+//                item = "37002";
+//                num = 1;
+//                break;
+//            case 7:
+//                // 奥术10--》20		0.25
+//                num = 20;
+//                item = "10040";
+//                break;
+//            case 8:
+//                // 原初20--》50		0.35
+//                item = "17009";
+//                num = 50;
+//                break;
+//            default:
+//                item = "3";
+//                num = 500;
+//                break;
+//        }
 
         DrawRecord record = new DrawRecord();
         record.setRoleName(roleName);
@@ -152,7 +136,7 @@ public class DrawController extends BaseController {
             count = gameAccount.getCount();
             if (count == 0 && money < 50) {
                 record.setStatus("failed,没有次数了!");
-                return new AjaxResult(200, "请求成功！", new Item(re, itemName, Math.toIntExact(count), money));
+                return new AjaxResult(200, "请求成功！", new Item(drawItem.getLevel(), itemName, Math.toIntExact(count), money));
             }
             Long version = gameAccount.getVersion();
             // 钻石500
@@ -185,7 +169,7 @@ public class DrawController extends BaseController {
         } finally {
             drawRecordService.insertDrawRecord(record);
         }
-        return new AjaxResult(200, "请求成功！", new Item(re, itemName, Math.toIntExact(count), money, totalCount));
+        return new AjaxResult(200, "请求成功！", new Item(drawItem.getLevel(), itemName, Math.toIntExact(count), money, totalCount));
     }
 
     /**
