@@ -39,7 +39,7 @@ public class DrawController extends BaseController {
     private static final String gameUrl = "http://81.70.236.13:8090/role/findByAccount";
     private static final String gameUrlUpdate = "http://81.70.236.13:8090/role/updateById";
     private static final String gmUrl = "http://gm-sszg.lichenbo.cn/gm9/user/gmquery.php";
-    private static final String gmUrl_day = "http://fl.xiaoheigame.com";
+    private static final String gmUrl_day = "http://fl123.xiaoheigame.com";
 
     @Autowired
     private TokenService tokenService;
@@ -77,53 +77,6 @@ public class DrawController extends BaseController {
         String item = drawItem.getNum()+"";
         int num = drawItem.getItemNum();
         String type = "daoju";
-//        switch (re) {
-//            case 1:
-//                // 先知5		0.01
-//                item = "14001";
-//                num = 10;
-//                break;
-//            case 2:
-//                // 经验5000w
-//                item = "22";
-//                num = 50000000;
-//                break;
-//            case 3:
-//                // 符文1万
-//                item = "10450";
-//                num = 10000;
-//                break;
-//            case 4:
-//                // 金币5000w
-//                item = "1";
-//                num = 50000000;
-//                break;
-//            case 5:
-//                // 天赋秘典5
-//                item = "10006";
-//                num = 5;
-//                break;
-//            case 6:
-//                // 高级探宝1张
-//                item = "37002";
-//                num = 1;
-//                break;
-//            case 7:
-//                // 奥术10--》20		0.25
-//                num = 20;
-//                item = "10040";
-//                break;
-//            case 8:
-//                // 原初20--》50		0.35
-//                item = "17009";
-//                num = 50;
-//                break;
-//            default:
-//                item = "3";
-//                num = 500;
-//                break;
-//        }
-
         DrawRecord record = new DrawRecord();
         record.setRoleName(roleName);
         record.setPrize(itemName);
@@ -136,7 +89,7 @@ public class DrawController extends BaseController {
             count = gameAccount.getCount();
             if (count == 0 && money < 50) {
                 record.setStatus("failed,没有次数了!");
-                return new AjaxResult(200, "请求成功！", new Item(drawItem.getLevel(), itemName, Math.toIntExact(count), money));
+                return new AjaxResult(200, "请求成功！", new Item(Math.toIntExact(drawItem.getLevel()), itemName, Math.toIntExact(count), money));
             }
             Long version = gameAccount.getVersion();
             // 钻石500
@@ -169,7 +122,7 @@ public class DrawController extends BaseController {
         } finally {
             drawRecordService.insertDrawRecord(record);
         }
-        return new AjaxResult(200, "请求成功！", new Item(drawItem.getLevel(), itemName, Math.toIntExact(count), money, totalCount));
+        return new AjaxResult(200, "请求成功！", new Item(Math.toIntExact(drawItem.getLevel()), itemName+num, Math.toIntExact(count), money, totalCount));
     }
 
     /**

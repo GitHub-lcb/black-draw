@@ -88,11 +88,13 @@
     <el-table v-loading="loading" :data="itemList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
 <!--      <el-table-column label="主键id" align="center" prop="id" />-->
-      <el-table-column label="图片路径" align="center" prop="icon" />
+<!--      <el-table-column label="图片路径" align="center" prop="icon" />-->
+      <el-table-column label="级别" align="center" prop="level" />
       <el-table-column label="物品名" align="center" prop="name" />
-      <el-table-column label="物品编号" align="center" prop="num" />
+      <el-table-column label="物品数量" align="center" prop="itemNum" />
       <el-table-column label="概率" align="center" prop="rate" />
-      <el-table-column label="是否中奖" align="center" prop="isPrize" />
+      <el-table-column label="物品编号" align="center" prop="num" />
+<!--      <el-table-column label="是否中奖" align="center" prop="isPrize" />-->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -135,6 +137,12 @@
         </el-form-item>
         <el-form-item label="概率" prop="rate">
           <el-input v-model="form.rate" placeholder="请输入概率" />
+        </el-form-item>
+        <el-form-item label="物品数量" prop="itemNum">
+          <el-input v-model="form.itemNum" placeholder="请输入物品数量" />
+        </el-form-item>
+        <el-form-item label="物品级别" prop="level">
+          <el-input v-model="form.level" placeholder="请输入物品级别" />
         </el-form-item>
         <el-form-item label="是否中奖" prop="isPrize">
           <el-input v-model="form.isPrize" placeholder="请输入是否中奖" />

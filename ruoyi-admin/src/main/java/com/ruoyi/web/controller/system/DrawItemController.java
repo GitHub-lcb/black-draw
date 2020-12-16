@@ -76,6 +76,7 @@ public class DrawItemController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody DrawItem drawItem)
     {
+        drawItem.setIcon("http://fuli.xiaoheigame.com/img/bean_500.png");
         return toAjax(drawItemService.insertDrawItem(drawItem));
     }
 

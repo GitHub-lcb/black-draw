@@ -22,7 +22,7 @@ public class DrawItem extends BaseEntity
     private int itemNum;
 
     @Excel(name = "奖品级别，别名")
-    private int level;
+    private Long level;
 
     /** 图片路径 */
     @Excel(name = "图片路径")
@@ -50,7 +50,7 @@ public class DrawItem extends BaseEntity
     public DrawItem() {
     }
 
-    public DrawItem(Long id, int itemNum, int level, String icon, String name, Long num, Double rate,
+    public DrawItem(Long id, int itemNum, Long level, String icon, String name, Long num, Double rate,
         Integer isPrize, String delFlag) {
         this.id = id;
         this.itemNum = itemNum;
@@ -71,11 +71,11 @@ public class DrawItem extends BaseEntity
         this.itemNum = itemNum;
     }
 
-    public int getLevel() {
+    public Long getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(Long level) {
         this.level = level;
     }
 

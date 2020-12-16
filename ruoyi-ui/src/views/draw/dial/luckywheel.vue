@@ -15,7 +15,7 @@
               <div class="prize-pic">
                 <img :src="item.icon"/>
               </div>
-              <div class="prize-type">{{ item.name }}</div>
+              <div class="prize-type">{{ item.level }}</div>
             </div>
           </div>
         </div>
@@ -28,6 +28,8 @@
         <br/>
         <br/>
         <div @click="DayFuli()" class="div_class_defaultBtn">每日福利(点击领取)</div>
+        <div @click="DayFuli()" class="div_class_defaultBtn">10连抽(点击领取)</div>
+        <div @click="DayFuli()" class="div_class_defaultBtn">周末特殊福利(点击领取)</div>
         <br/>
         <div class="count">今日免费抽奖次数： {{ count }}</div>
         <br/>
@@ -113,7 +115,7 @@ export default {
     toastTitle() {
       return this.prize && this.prize.isPrize === 1
         ? "恭喜您，获得" +
-        this.prize.name
+        this.prize.name + this.prize.itemNum
         : "未中奖，小黑来陪！";
     },
     toastIcon() {

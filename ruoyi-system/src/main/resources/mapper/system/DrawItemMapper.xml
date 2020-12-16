@@ -21,7 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectDrawItemVo">
-        select id, icon, name, num, rate, is_prize, del_flag, create_by, create_time, update_by, update_time from draw_item
+        select id, icon, name, level,item_num,num, rate, is_prize, del_flag, create_by, create_time, update_by, update_time from draw_item
     </sql>
 
     <select id="selectDrawItemList" parameterType="com.ruoyi.system.domain.DrawItem" resultMap="DrawItemResult">
@@ -31,8 +31,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
             <if test="num != null "> and num = #{num}</if>
             <if test="rate != null "> and rate = #{rate}</if>
-            <if test="level != null "> and level = #{level}</if>
+            <if test="level != null and level != 0 "> and level = #{level}</if>
+            <if test="delFlag == null "> and del_flag = '0'</if>
         </where>
+        order by level asc
     </select>
     
     <select id="selectDrawItemById" parameterType="Long" resultMap="DrawItemResult">
