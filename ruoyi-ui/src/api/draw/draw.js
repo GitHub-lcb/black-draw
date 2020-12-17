@@ -24,3 +24,11 @@ export function sendDayFuli() {
     method: 'get'
   })
 }
+
+// 发送回档福利
+export function sendHolidayFulii() {
+  return request({
+    url: '/draw/holidayFuli',
+    method: 'get'
+  })
+}

@@ -28,8 +28,8 @@
         <br/>
         <br/>
         <div @click="DayFuli()" class="div_class_defaultBtn">每日福利(点击领取)</div>
-        <div @click="DayFuli()" class="div_class_defaultBtn">10连抽(点击领取)</div>
-        <div @click="DayFuli()" class="div_class_defaultBtn">周末特殊福利(点击领取)</div>
+        <br/>
+        <div @click="HolidayFuli()" class="div_class_defaultBtn">12-17回档福利(点击领取)</div>
         <br/>
         <div class="count">今日免费抽奖次数： {{ count }}</div>
         <br/>
@@ -63,7 +63,7 @@
 </template>
 <script>
 // import {prizeList} from './config'
-import {getItemsAndPersonInfo, getReward, sendDayFuli} from "@/api/draw/draw";
+import {getItemsAndPersonInfo, getReward, sendDayFuli, sendHolidayFulii} from "@/api/draw/draw";
 
 const CIRCLE_ANGLE = 360
 
@@ -134,6 +134,15 @@ export default {
         }
       });
     },
+    HolidayFuli(){
+          sendHolidayFulii().then(response =>{
+            if (response.code === 200){
+              this.msgSuccess(response.data);
+            } else {
+              this.msgError(response.data);
+            }
+          });
+        },
     initPrizeList() {
       // 这里可以发起请求，从服务端获取奖品列表
       getItemsAndPersonInfo().then(response => {

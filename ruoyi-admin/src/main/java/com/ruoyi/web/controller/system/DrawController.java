@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 /**
  * @author lcb
@@ -40,6 +41,14 @@ public class DrawController extends BaseController {
     private static final String gameUrlUpdate = "http://81.70.236.13:8090/role/updateById";
     private static final String gmUrl = "http://gm-sszg.lichenbo.cn/gm9/user/gmquery.php";
     private static final String gmUrl_day = "http://fl123.xiaoheigame.com";
+
+    private static Map<String, Integer> holidayMap = new HashMap();
+
+    static {
+        holidayMap.put("22",100);
+        holidayMap.put("222",100);
+        holidayMap.put("2222",100);
+    }
 
     @Autowired
     private TokenService tokenService;
@@ -140,6 +149,44 @@ public class DrawController extends BaseController {
         String result = HttpUtils.sendPost(gmUrl_day, params);
         result = result.substring(result.indexOf("script>") + 14, result.indexOf("</script>") - 2);
         return new AjaxResult(200, "success", result);
+    }
+
+    /**
+     * 发送特殊福利
+     *
+     * @return
+     */
+    @GetMapping("/holidayFuli")
+    public AjaxResult holidayFuli() {
+        SysUser user = getSysUser();
+        String userName = user.getUserName();
+        GameAccount gameAccount = gameAccountService.selectGameAccountByName(userName);
+
+        String regId = gameAccount.getRegIp();
+        if ("1".equals(regId)){
+            return new AjaxResult(200,"success","当前账号已领取过补偿福利，继续领取请洗干净了去找小黑！");
+        }
+        gameAccount.setRegIp("1");
+        gameAccountService.updateGameAccount(gameAccount);
+        StringBuilder sb = null;
+        try {
+            sb = new StringBuilder();
+            StringBuilder finalSb = sb;
+            holidayMap.forEach((item,num) ->{
+                String emailResult = sendEmail(item, userName, num, "daoju");
+                System.out.println(emailResult);
+                finalSb.append( (item+num+"个，"));
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 异常回滚数据
+            gameAccount.setRegIp("0");
+            gameAccountService.updateGameAccount(gameAccount);
+        }
+
+        System.out.println(sb.toString());
+        return new AjaxResult(200, "success", "回档补偿福利领取成功，可到抽奖记录查看物品列表！");
     }
 
     private String sendEmail(String item, String uid, int num, String type) {

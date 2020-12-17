@@ -33,14 +33,14 @@
 <!--          @keyup.enter.native="handleQuery"-->
 <!--        />-->
 <!--      </el-form-item>-->
-<!--      <el-form-item label="创建时间" prop="createTime">-->
-<!--        <el-date-picker clearable size="small" style="width: 200px"-->
-<!--          v-model="queryParams.createTime"-->
-<!--          type="date"-->
-<!--          value-format="yyyy-MM-dd"-->
-<!--          placeholder="选择创建时间">-->
-<!--        </el-date-picker>-->
-<!--      </el-form-item>-->
+      <el-form-item label="创建时间" prop="createTime">
+       <el-date-picker clearable size="small" style="width: 200px"
+         v-model="queryParams.createTime"
+         type="date"
+         value-format="yyyy-MM-dd"
+         placeholder="选择创建时间">
+       </el-date-picker>
+      </el-form-item>
       <el-form-item>
         <el-button type="cyan" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
