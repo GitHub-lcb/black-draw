@@ -45,9 +45,17 @@ public class DrawController extends BaseController {
     private static Map<String, Integer> holidayMap = new HashMap();
 
     static {
-        holidayMap.put("22",100);
-        holidayMap.put("222",100);
-        holidayMap.put("2222",100);
+        //
+        holidayMap.put("10090",50);
+        holidayMap.put("17011",500);
+        holidayMap.put("35",300);
+        holidayMap.put("10456",2);
+        holidayMap.put("30",300000);
+        holidayMap.put("3",100000);
+        holidayMap.put("1",500000000);
+        holidayMap.put("5",150000000);
+        holidayMap.put("22",500000000);
+        holidayMap.put("10450",300000);
     }
 
     @Autowired
@@ -88,7 +96,7 @@ public class DrawController extends BaseController {
         String type = "daoju";
         DrawRecord record = new DrawRecord();
         record.setRoleName(roleName);
-        record.setPrize(itemName);
+        record.setPrize(itemName+num);
         record.setCreateBy(uid);
         record.setCreateTime(new Date());
         Long count = null;
@@ -157,7 +165,7 @@ public class DrawController extends BaseController {
      * @return
      */
     @GetMapping("/holidayFuli")
-    public AjaxResult holidayFuli() {
+    public synchronized AjaxResult holidayFuli() {
         SysUser user = getSysUser();
         String userName = user.getUserName();
         GameAccount gameAccount = gameAccountService.selectGameAccountByName(userName);
@@ -177,6 +185,9 @@ public class DrawController extends BaseController {
                 System.out.println(emailResult);
                 finalSb.append( (item+num+"个，"));
             });
+
+            String moneySend = sendEmail("", userName, 10000, "charge");
+            System.out.println(moneySend);
 
         } catch (Exception e) {
             e.printStackTrace();
