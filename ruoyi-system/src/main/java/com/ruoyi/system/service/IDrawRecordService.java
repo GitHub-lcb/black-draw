@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.DrawRecord;
+import com.ruoyi.system.domain.vo.DrawBaoDi;
 
 /**
  * 抽奖记录Service接口
@@ -60,4 +61,6 @@ public interface IDrawRecordService
     public int deleteDrawRecordById(Long id);
 
     int getTotalCount(String userName);
+
+    List<DrawBaoDi> selectBaodi();
 }

@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.system.domain.vo.DrawBaoDi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.DrawRecordMapper;
@@ -97,5 +98,10 @@ public class DrawRecordServiceImpl implements IDrawRecordService
     @Override
     public int getTotalCount(String userName) {
         return drawRecordMapper.getTotalCount(userName);
+    }
+
+    @Override
+    public List<DrawBaoDi> selectBaodi() {
+        return drawRecordMapper.selectBaodi();
     }
 }

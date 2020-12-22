@@ -95,4 +95,9 @@
         set count  = 10
     </update>
 
+    <update id="updategameAccountIp">
+        update game_account
+        set reg_ip  = '2'
+    </update>
+
 </mapper>

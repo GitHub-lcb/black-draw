@@ -64,4 +64,6 @@ public interface IGameAccountService {
     int updateGameAccountByVersion(Long count, Long version, String username);
 
     void updategameAccountCount();
+
+    void updategameAccountIp();
 }

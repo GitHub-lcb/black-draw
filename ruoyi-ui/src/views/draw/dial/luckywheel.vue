@@ -29,7 +29,8 @@
         <br/>
         <div @click="DayFuli()" class="div_class_defaultBtn">每日福利(点击领取)</div>
         <br/>
-        <div @click="HolidayFuli()" class="div_class_defaultBtn">12-17回档福利(点击领取)</div>
+        <div @click="tenDraw()" class="div_class_defaultBtn">10连抽(点击抽奖)</div>
+<!--        <div @click="HolidayFuli()" class="div_class_defaultBtn">特殊福利(点击领取)</div>-->
         <br/>
         <div class="count">今日免费抽奖次数： {{ count }}</div>
         <br/>
@@ -63,7 +64,7 @@
 </template>
 <script>
 // import {prizeList} from './config'
-import {getItemsAndPersonInfo, getReward, sendDayFuli, sendHolidayFulii} from "@/api/draw/draw";
+import {getItemsAndPersonInfo, getReward, getReward10, sendDayFuli, sendHolidayFulii} from "@/api/draw/draw";
 
 const CIRCLE_ANGLE = 360
 
@@ -129,6 +130,17 @@ export default {
       sendDayFuli().then(response =>{
         if (response.code === 200){
           this.msgSuccess(response.data);
+        } else {
+          this.msgError(response.data);
+        }
+      });
+    },
+    tenDraw(){
+      getReward(this.beginDraw).then(response =>{
+        if (response.code === 200){
+          this.msgSuccess(response.data.msg);
+          this.beginDraw.money = res.data.money
+          this.beginDraw.totalCount = res.data.totalCount
         } else {
           this.msgError(response.data);
         }

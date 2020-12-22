@@ -16,6 +16,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
     </resultMap>
 
+    <resultMap type="com.ruoyi.system.domain.vo.DrawBaoDi" id="DrawBD">
+        <result property="count"    column="count"    />
+        <result property="username"    column="create_by"    />
+    </resultMap>
+
     <sql id="selectDrawRecordVo">
         select id, prize, role_name, status, del_flag, create_by, create_time, update_by, update_time from draw_record
     </sql>
@@ -90,6 +95,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getTotalCount" parameterType="String" resultType="int">
         select count(*) from draw_record where create_by = #{userName}
+    </select>
+
+    <select id="selectBaodi" resultMap="DrawBD">
+        select create_by,count(*) count from draw_record where date(create_time) = date_sub(curdate(),interval 1 day) group by create_by
     </select>
     
 </mapper>

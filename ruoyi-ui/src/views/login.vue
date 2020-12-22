@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">小黑高端福利群后台系统</h3>
+      <h3 class="title">小黑个人学习心得系统</h3>
       <el-form-item prop="username">
         <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
@@ -48,7 +48,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2020 小黑.vip All Rights Reserved.</span>
+      <span>备案号：鄂ICP备19023657号-3</span>
     </div>
   </div>
 </template>
@@ -93,7 +93,7 @@ export default {
     }
   },
   created() {
-    this.getCode();
+    // this.getCode();
     this.getCookie();
   },
   methods: {

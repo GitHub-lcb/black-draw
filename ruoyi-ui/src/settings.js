@@ -1,5 +1,5 @@
 module.exports = {
-  title: '小黑高端福利群',
+  title: '小黑福利后台系统',
 
   /**
    * 是否系统布局配置

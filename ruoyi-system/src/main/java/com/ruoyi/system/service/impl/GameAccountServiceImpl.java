@@ -100,4 +100,9 @@ public class GameAccountServiceImpl implements IGameAccountService {
     public void updategameAccountCount() {
         gameAccountMapper.updateGameAccountCount();
     }
+
+    @Override
+    public void updategameAccountIp() {
+        gameAccountMapper.updategameAccountIp();
+    }
 }

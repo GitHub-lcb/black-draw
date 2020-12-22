@@ -46,16 +46,19 @@ public class DrawController extends BaseController {
 
     static {
         //
-        holidayMap.put("10090",50);
-        holidayMap.put("17011",500);
-        holidayMap.put("35",300);
-        holidayMap.put("10456",2);
-        holidayMap.put("30",300000);
-        holidayMap.put("3",100000);
-        holidayMap.put("1",500000000);
-        holidayMap.put("5",150000000);
-        holidayMap.put("22",500000000);
-        holidayMap.put("10450",300000);
+//        holidayMap.put("10090",50);
+//        holidayMap.put("17011",500);
+//        holidayMap.put("35",300);
+//        holidayMap.put("10456",2);
+//        holidayMap.put("30",300000);
+//        holidayMap.put("3",100000);
+//        holidayMap.put("1",500000000);
+//        holidayMap.put("5",150000000);
+//        holidayMap.put("22",500000000);
+//        holidayMap.put("10450",300000);
+        holidayMap.put("50918",1);
+        holidayMap.put("39523",1);
+        holidayMap.put("39017",30);
     }
 
     @Autowired
@@ -82,6 +85,87 @@ public class DrawController extends BaseController {
 
         // 查询物品列表
         List<DrawItem> drawItems = drawItemService.selectDrawItemList(new DrawItem());
+        // 获取角色id
+        String uid = getSysUser().getUserName();
+
+        Map<DrawItem, Integer> itemMap = new HashMap<>();
+        drawItems.stream().forEach(drawItem -> {
+            itemMap.put(drawItem, (int) (drawItem.getRate()*1000));
+        });
+        DrawItem drawItem = RandomUtils.chanceSelect(itemMap);
+
+        boolean flag = true;
+        String type = "daoju";
+        DrawRecord record = initRecordLog(roleName, uid, drawItem.getName(), drawItem.getItemNum());
+        Long count = null;
+        try {
+            GameAccount gameAccount = gameAccountService.selectGameAccountByName(uid);
+            count = gameAccount.getCount();
+            if (count == 0 && money < 50) {
+                record.setStatus("failed,没有次数了!");
+                flag = false;
+            }
+            Long version = gameAccount.getVersion();
+            if (count > 0) {
+                // 不消耗快乐币发送邮件
+                String emailResult = sendEmail(drawItem.getNum()+"", uid, drawItem.getItemNum(), type);
+                if ("ok！设置成功".equals(emailResult) || "发送成功".equals(emailResult)) {
+                    int i = 0;
+                    while (i == 0) {
+                        // 并发版本控制
+                        i = gameAccountService.updateGameAccountByVersion(--count, version, uid);
+                    }
+                }
+            } else {
+                // 1.减少快乐币
+                money = money - 50;
+                String params = "id=" + id + "&money=" + money;
+                JSONObject result = JSONObject.parseObject(HttpUtils.sendGet(gameUrlUpdate, params + "&sign=" + SignUtils.getSign(params)));
+                if (result.getInteger("code") == 200) {
+                    sendEmail(drawItem.getNum()+"", uid, drawItem.getItemNum(), type);
+                }
+            }
+            record.setStatus("ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+            record.setStatus("fail:" + e.getMessage());
+        } finally {
+            drawRecordService.insertDrawRecord(record);
+        }
+
+
+
+        int totalCount = drawRecordService.getTotalCount(uid);
+
+
+        if (!flag){
+            return new AjaxResult(503, "请求失败！", new Item(Math.toIntExact(drawItem.getLevel()), drawItem.getName(), Math.toIntExact(count), money));
+        }
+        return new AjaxResult(200, "请求成功！", new Item(Math.toIntExact(drawItem.getLevel()), drawItem.getName()+drawItem.getItemNum(), Math.toIntExact(count), money, totalCount));
+    }
+
+    private DrawRecord initRecordLog(@RequestParam String roleName, String uid, String itemName, int num) {
+        DrawRecord record = new DrawRecord();
+        record.setRoleName(roleName);
+        record.setPrize(itemName + num);
+        record.setCreateBy(uid);
+        record.setCreateTime(new Date());
+        return record;
+    }
+
+
+    /**
+     * 开始抽奖，
+     * 1.抽奖
+     * 2.异步减少用户的快乐币数量
+     * 3.异步给用户发送物品邮件
+     */
+    @PreAuthorize("@ss.hasPermi('draw:getReward')")
+    @GetMapping("/getReward10")
+    public AjaxResult getReward10(@RequestParam Integer id, @RequestParam Integer money, @RequestParam String roleName) {
+
+        // 查询物品列表
+        List<DrawItem> drawItems = drawItemService.selectDrawItemList(new DrawItem());
         Map<DrawItem, Integer> itemMap = new HashMap<>();
         drawItems.stream().forEach(drawItem -> {
             itemMap.put(drawItem, (int) (drawItem.getRate()*1000));
@@ -94,11 +178,7 @@ public class DrawController extends BaseController {
         String item = drawItem.getNum()+"";
         int num = drawItem.getItemNum();
         String type = "daoju";
-        DrawRecord record = new DrawRecord();
-        record.setRoleName(roleName);
-        record.setPrize(itemName+num);
-        record.setCreateBy(uid);
-        record.setCreateTime(new Date());
+        DrawRecord record = initRecordLog(roleName, uid, itemName, num);
         Long count = null;
         int totalCount = drawRecordService.getTotalCount(uid);
         try {
@@ -109,10 +189,6 @@ public class DrawController extends BaseController {
                 return new AjaxResult(200, "请求成功！", new Item(Math.toIntExact(drawItem.getLevel()), itemName, Math.toIntExact(count), money));
             }
             Long version = gameAccount.getVersion();
-            // 钻石500
-            sendEmail("3", uid, 500, type);
-            // 随机5星碎片
-            sendEmail("29905", uid, 5, type);
             if (count > 0) {
                 // 不消耗快乐币发送邮件
                 String emailResult = sendEmail(item, uid, num, type);
@@ -162,6 +238,8 @@ public class DrawController extends BaseController {
     /**
      * 发送特殊福利
      *
+     * 10连抽
+     *
      * @return
      */
     @GetMapping("/holidayFuli")
@@ -172,9 +250,12 @@ public class DrawController extends BaseController {
 
         String regId = gameAccount.getRegIp();
         if ("1".equals(regId)){
-            return new AjaxResult(200,"success","当前账号已领取过补偿福利，继续领取请洗干净了去找小黑！");
+            return new AjaxResult(200,"success","时间到了吗，就领取，夜深了早点休息！");
         }
-        gameAccount.setRegIp("1");
+        if ("3".equals(regId)){
+            return new AjaxResult(200,"success","福利已被领取，重复领取奖励华为P40一部吗？ 不可能~");
+        }
+        gameAccount.setRegIp("3");
         gameAccountService.updateGameAccount(gameAccount);
         StringBuilder sb = null;
         try {
@@ -186,8 +267,8 @@ public class DrawController extends BaseController {
                 finalSb.append( (item+num+"个，"));
             });
 
-            String moneySend = sendEmail("", userName, 10000, "charge");
-            System.out.println(moneySend);
+//            String moneySend = sendEmail("", userName, 10000, "charge");
+//            System.out.println(moneySend);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -197,10 +278,10 @@ public class DrawController extends BaseController {
         }
 
         System.out.println(sb.toString());
-        return new AjaxResult(200, "success", "回档补偿福利领取成功，可到抽奖记录查看物品列表！");
+        return new AjaxResult(200, "success", "福利领取成功，到游戏中查收邮件！");
     }
 
-    private String sendEmail(String item, String uid, int num, String type) {
+    public String sendEmail(String item, String uid, int num, String type) {
         // 发送邮件
         String paramEmail = "type=" + type + "&qu=1&checknum=952000&item=" + item + "&uid=" + uid + "&num=" + num;
         String sign = SignUtils.getSign(paramEmail);

@@ -17,6 +17,15 @@ export function getReward(beginDraw) {
   })
 }
 
+// 开始抽奖
+export function getReward10(beginDraw) {
+  return request({
+    url: '/draw/getReward10',
+    method: 'get',
+    params: beginDraw
+  })
+}
+
 // 发送每日奖励
 export function sendDayFuli() {
   return request({

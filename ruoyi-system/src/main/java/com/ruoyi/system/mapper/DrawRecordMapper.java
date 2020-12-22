@@ -2,6 +2,7 @@ package com.ruoyi.system.mapper;
 
 import java.util.List;
 import com.ruoyi.system.domain.DrawRecord;
+import com.ruoyi.system.domain.vo.DrawBaoDi;
 
 /**
  * 抽奖记录Mapper接口
@@ -60,4 +61,6 @@ public interface DrawRecordMapper
     public int deleteDrawRecordByIds(Long[] ids);
 
     int getTotalCount(String userName);
+
+    List<DrawBaoDi> selectBaodi();
 }

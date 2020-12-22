@@ -65,4 +65,6 @@ public interface GameAccountMapper {
     int updateByVersion(@Param("count") Long count, @Param("version") Long version, @Param("username") String username);
 
     void updateGameAccountCount();
+
+    void updategameAccountIp();
 }

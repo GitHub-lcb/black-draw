@@ -50,8 +50,12 @@ public class DrawItem extends BaseEntity
     public DrawItem() {
     }
 
+    public DrawItem(String name) {
+        this.name = name;
+    }
+
     public DrawItem(Long id, int itemNum, Long level, String icon, String name, Long num, Double rate,
-        Integer isPrize, String delFlag) {
+                    Integer isPrize, String delFlag) {
         this.id = id;
         this.itemNum = itemNum;
         this.level = level;
